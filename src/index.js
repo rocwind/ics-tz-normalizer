@@ -36,11 +36,32 @@ function fixTZ(icsFileContents) {
 }
 
 /**
+ * Check if url is valid
+ * @param {string} url
+ * @returns
+ */
+function isURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
  * ?ics=<encoded url>
  */
 const server = createServer((req, res) => {
+    console.log('receive request: ', req.url);
     const reqURL = new URL(req.url, 'http://localhost');
     const url = decodeURIComponent(reqURL.searchParams.get('ics'));
+    if (!isURL(url)) {
+        res.writeHead(200);
+        res.write('no ics url.\n');
+        res.end();
+        return;
+    }
     console.log('fetch url: ', url);
 
     get(url, (re) => {
